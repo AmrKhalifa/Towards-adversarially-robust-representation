@@ -148,14 +148,14 @@ def VAELoss(x_hat, x, mu, logvar):
     )
     KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
 
-    return BCE + KLD
+    return BCE + 1*KLD
 
 
 def train_vae(model, train_data):
     lr = 0.001
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
-    n_epochs = 25
+    n_epochs = 10
     model.train()
     for epoch in range(n_epochs):
 
@@ -185,10 +185,11 @@ if __name__ == "__main__":
     # vae = VAE_CONV_NeuralModel()
     # vae = train_vae(vae, train_loader)
     #
-    # torch.save(vae.state_dict(), "models/trained_CONV_vae")
+    # torch.save(vae.state_dict(), "models/trained_CONV_vae_B=1")
 
     vae = VAE_CONV_NeuralModel()
-    vae.load_state_dict(torch.load("models/trained_CONV_vae"))
+    vae.load_state_dict(torch.load("models/trained_CONV_vae_B=1"))
+
 
     first_batch = next(iter(train_loader))
     first_images, _ = first_batch

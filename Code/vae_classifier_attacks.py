@@ -19,7 +19,7 @@ class VAEClassifierModel(nn.Module):
         super().__init__()
 
         self.vae = VAE_CONV_NeuralModel()
-        self.vae.load_state_dict(torch.load("models/trained_CONV_vae"))
+        self.vae.load_state_dict(torch.load("models/trained_CONV_vae_B=1"))
 
         self.classification_model = NeuralModel()
         self.classification_model.load_state_dict(torch.load("models/trained_model"))

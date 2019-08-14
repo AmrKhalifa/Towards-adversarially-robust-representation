@@ -140,7 +140,7 @@ b_size, w, h = images.shape
 images = images.reshape(b_size, 1, w, h)
 
 vae = VAE_CONV_NeuralModel()
-vae.load_state_dict(torch.load("models/trained_CONV_vae"))
+vae.load_state_dict(torch.load("models/trained_CONV_vae_B=1"))
 #
 # plt.imshow(images[15])
 # plt.show()
