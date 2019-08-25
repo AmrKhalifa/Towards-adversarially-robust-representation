@@ -91,12 +91,11 @@ def test_model(model, test_data):
 def main():
     pass
 
-
 if __name__ == "__main__":
     neural_model = NeuralModel()
 
-    # trained_model = train_model(neural_model, train_loader)
-    # torch.save(trained_model.state_dict(), "models/trained_model")
+    trained_model = train_model(neural_model, train_loader)
+    torch.save(trained_model.state_dict(), "models/trained_model")
 
     classification_model = NeuralModel()
     classification_model.load_state_dict(torch.load("models/trained_model"))
