@@ -56,13 +56,6 @@ def test_model(model, test_data):
     print("The classifier accuracy is: ", 100 * accuracy)
 
 
-print("Before attack ")
-model = VAEClassifierModel()
-test_model(model, test_loader)
-
-print("=*=" * 20)
-print("After attack ...")
-
 
 def fgsm_attack(image, epsilon, data_grad):
     # Collect the element-wise sign of the data gradient
@@ -79,7 +72,9 @@ def test(model, device, test_loader, epsilon):
     # Accuracy counter
     correct = 0
     adv_examples = []
-
+    
+    model.eval()
+    model.to(device)
     # Loop over all examples in test set
     for data, target in test_loader:
 
@@ -91,12 +86,7 @@ def test(model, device, test_loader, epsilon):
 
         # Forward pass the data through the model
         output = model(data)
-
         init_pred = output.max(1, keepdim=True)[1]  # get the index of the max log-probability
-        # print(init_pred)
-        # If the initial prediction is wrong, dont bother attacking, just move on
-        # if init_pred.item() != target.item():
-        #     continue
 
         # Calculate the loss
         loss = F.nll_loss(output, target)
@@ -120,15 +110,11 @@ def test(model, device, test_loader, epsilon):
         final_pred = output.max(1, keepdim=True)[1]  # get the index of the max log-probability
         if final_pred.item() == target.item():
             correct += 1
-            # Special case for saving 0 epsilon examples
-            if (epsilon == 0) and (len(adv_examples) < 5):
-                adv_ex = perturbed_data.squeeze().detach().cpu().numpy()
-                adv_examples.append((init_pred.item(), final_pred.item(), adv_ex))
-        else:
-            # Save some adv examples for visualization later
-            if len(adv_examples) < 10000:
-                adv_ex = perturbed_data.squeeze().detach().cpu().numpy()
-                adv_examples.append((init_pred.item(), final_pred.item(), adv_ex))
+        
+        # Save the adv examples for visualization later
+        
+        adv_ex = perturbed_data.squeeze().detach().cpu().numpy()
+        adv_examples.append((init_pred.item(), final_pred.item(), adv_ex))
 
     # Calculate final accuracy for this epsilon
     final_acc = correct / float(len(test_loader))
@@ -137,5 +123,17 @@ def test(model, device, test_loader, epsilon):
     # Return the accuracy and an adversarial example
     return final_acc, adv_examples
 
+def main():
+    pass
 
-acc, examples = test(model, device, test_loader, epsilon=0.3)
+
+if __name__ == "__main__":
+    print("Before attack ")
+    model = VAEClassifierModel()
+    test_model(model, test_loader)
+
+    print("=*=" * 20)
+    print("After attack ...")
+
+
+    main()
