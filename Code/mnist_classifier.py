@@ -3,6 +3,8 @@ import torch.nn as nn
 from utils import data_loader
 
 train_set, test_set = data_loader.get_data()
+use_cuda = True
+device = torch.device("cuda" if (use_cuda and torch.cuda.is_available()) else "cpu")
 
 
 class NeuralModel(nn.Module):
@@ -49,10 +51,16 @@ def train_model(model, train_data):
 
     n_epochs = 100
     model.train()
+    
+    model.to(device)
+    
     for epoch in range(n_epochs):
 
         for batch in train_data:
             batch_images, batch_labels = batch
+            
+            batch_images = batch_images.to(device)
+            batch_labels = batch_labels.to(device)
 
             batch_output = model(batch_images)
             loss = criterion(batch_output, batch_labels)
@@ -66,11 +74,15 @@ def train_model(model, train_data):
 
 def test_model(model, test_data):
     model.eval()
-
+    model.to(device)
     correct = 0
     try:
         for batch in test_data:
             batch_images, batch_labels = batch
+            
+            batch_images = batch_images.to(device)
+            batch_labels = batch_labels.to(device)
+            
             predictions = model(batch_images)
 
             predictions = predictions.data.max(1, keepdim=True)[1]
