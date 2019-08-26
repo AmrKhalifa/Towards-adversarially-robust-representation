@@ -76,6 +76,7 @@ def test_model(model, test_data):
     model.eval()
     model.to(device)
     correct = 0
+    ## stupid and very general try except block, modify it later for specific exceptions
     try:
         for batch in test_data:
             batch_images, batch_labels = batch
@@ -97,7 +98,9 @@ def test_model(model, test_data):
 
     accuracy = float(correct.item() / len(test_loader.dataset))
 
-    print("The classifier accuracy is: ", 100 * accuracy)
+    #print("The classifier accuracy is: ", 100 * accuracy)
+    
+    return accuracy
 
 
 def main():
