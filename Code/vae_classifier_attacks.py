@@ -34,14 +34,18 @@ class VAEClassifierModel(nn.Module):
 
 def test_model(model, test_data):
     model.eval()
-
+    model.to(device)
     correct = 0
     try:
         for batch in test_data:
             batch_images, batch_labels = batch
-
+            
+            batch_images = batch_images.to(device)
+            batch_labels = batch_labels.to(device)
+            
             predictions = model(batch_images)
             predictions = predictions.data.max(1, keepdim=True)[1]
+            
             correct += predictions.eq(batch_labels.data.view_as(predictions)).sum()
 
     except:
@@ -54,6 +58,8 @@ def test_model(model, test_data):
     accuracy = float(correct.item() / len(test_loader.dataset))
 
     print("The classifier accuracy is: ", 100 * accuracy)
+    
+    return accuracy
 
 
 
@@ -68,7 +74,7 @@ def fgsm_attack(image, epsilon, data_grad):
     return perturbed_image
 
 
-def test(model, device, test_loader, epsilon):
+def test_attack(model, device, test_loader, epsilon):
     # Accuracy counter
     correct = 0
     adv_examples = []
