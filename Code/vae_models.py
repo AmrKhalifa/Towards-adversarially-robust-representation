@@ -97,7 +97,27 @@ class VAE_CONV_NeuralModel(nn.Module):
 
         return output, mu, log_var
 
+    def get_latent(self, x):
+        encoded = self.encoder(x)
 
+        encoded = encoded.view(-1, 7 * 7 * 16)
+
+        fc = self.fc(encoded)
+
+        mu = self.fc_mu(fc)
+        log_var = self.fc_log_var(fc)
+
+        z = self.reparameterize(mu, log_var)
+        latent = self.latent(z)
+        latent = latent.view(-1, 16, 7, 7)
+        
+        return latent
+    
+    def get_decoded(self, x):
+        decoded = self.decoder(x)
+        output = decoded.view(-1, 1, 28, 28)
+        
+        return output 
 # d = 20
 #
 # class VAE_FC_NeuralModel(nn.Module):
