@@ -98,67 +98,73 @@ def test(model, device, test_loader, epsilon):
     # Return the accuracy and an adversarial example
     return final_acc, adv_examples
 
+def main():
+    pass
 
-accuracies = []
-examples = []
+if __name__ == "__main__":
+    accuracies = []
+    examples = []
 
-# Run test for each epsilon
-# for eps in epsilons:
-#     acc, ex = test(classification_model, device, test_loader, eps)
-#     accuracies.append(acc)
-#     examples.append(ex)
+    # Run test for each epsilon
+    # for eps in epsilons:
+    #     acc, ex = test(classification_model, device, test_loader, eps)
+    #     accuracies.append(acc)
+    #     examples.append(ex)
 
-# with open('models/adversarial_examples.pkl', 'wb') as f:
-#     pickle.dump(examples, f)
+    # with open('models/adversarial_examples.pkl', 'wb') as f:
+    #     pickle.dump(examples, f)
 
-with open('models/adversarial_examples.pkl', 'rb') as f:
-    examples = pickle.load(f)
+    with open('models/adversarial_examples.pkl', 'rb') as f:
+        examples = pickle.load(f)
 
-examples = examples[0]
+    examples = examples[0]
 
-true_labels = []
-adv_labels = []
-images = []
+    true_labels = []
+    adv_labels = []
+    images = []
 
-for example in examples:
-    true_label, adv_label, image = example
+    for example in examples:
+        true_label, adv_label, image = example
 
-    true_labels.append(true_label)
-    adv_labels.append(adv_label)
-    images.append(image)
+        true_labels.append(true_label)
+        adv_labels.append(adv_label)
+        images.append(image)
 
-true_labels = torch.Tensor(true_labels).long()
-images = torch.Tensor(images)
-b_size, w, h = images.shape
-images = images.reshape(b_size, 1, w, h)
+    true_labels = torch.Tensor(true_labels).long()
+    images = torch.Tensor(images)
+    b_size, w, h = images.shape
+    images = images.reshape(b_size, 1, w, h)
 
-vae = VAE_CONV_NeuralModel()
-vae.load_state_dict(torch.load("models/trained_CONV_vae_B=1"))
-#
-# plt.imshow(images[15])
-# plt.show()
-#
+    vae = VAE_CONV_NeuralModel()
+    vae.load_state_dict(torch.load("models/trained_CONV_vae_B=1"))
+    #
+    # plt.imshow(images[15])
+    # plt.show()
+    #
 
-testing_images = test_set.test_data.reshape(-1,1, 28,28).float()
-testing_labels = test_set.targets
-recs, _, _ = vae(testing_images)
-recs = recs.reshape(-1, 1, 28, 28)
+    testing_images = test_set.test_data.reshape(-1,1, 28,28).float()
+    testing_labels = test_set.targets
+    recs, _, _ = vae(testing_images)
+    recs = recs.reshape(-1, 1, 28, 28)
 
-# show_batch(recs)
+    # show_batch(recs)
 
-reconstructed_data = (recs, testing_labels)
+    reconstructed_data = (recs, testing_labels)
 
-mnist_classifier.test_model(classification_model, reconstructed_data)
+    mnist_classifier.test_model(classification_model, reconstructed_data)
 
-# print(true_labels[4])
-# print(adv_labels[4])
-# plt.imshow(images[0])
-#plt.show()
-# plt.figure(figsize=(5, 5))
-# plt.plot(epsilons, accuracies, "*-")
-# plt.yticks(np.arange(0, 1.1, step=0.1))
-# plt.xticks(np.arange(0, .35, step=0.05))
-# plt.title("Accuracy vs Epsilon")
-# plt.xlabel("Epsilon")
-# plt.ylabel("Accuracy")
-# plt.show()
+    # print(true_labels[4])
+    # print(adv_labels[4])
+    # plt.imshow(images[0])
+    #plt.show()
+    # plt.figure(figsize=(5, 5))
+    # plt.plot(epsilons, accuracies, "*-")
+    # plt.yticks(np.arange(0, 1.1, step=0.1))
+    # plt.xticks(np.arange(0, .35, step=0.05))
+    # plt.title("Accuracy vs Epsilon")
+    # plt.xlabel("Epsilon")
+    # plt.ylabel("Accuracy")
+    # plt.show()
+    main()
+
+

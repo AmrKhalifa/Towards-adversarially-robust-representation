@@ -49,7 +49,7 @@ def train_model(model, train_data):
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
-    n_epochs = 100
+    n_epochs = 10
     model.train()
     
     model.to(device)
@@ -90,6 +90,7 @@ def test_model(model, test_data):
             correct += predictions.eq(batch_labels.data.view_as(predictions)).sum()
 
     except:
+        print("executing, the except block") 
         (batch_images, batch_labels) = test_data
         predictions = model(batch_images)
 
