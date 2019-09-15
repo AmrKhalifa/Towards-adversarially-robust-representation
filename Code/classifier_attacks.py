@@ -43,7 +43,7 @@ def fgsm_attack(image, epsilon, data_grad):
     # Return the perturbed image
     return perturbed_image
 
-def test(model, device, test_loader, epsilon):
+def test_attack(model, device, test_loader, epsilon):
     # Accuracy counter
     correct = 0
     adv_examples = []
@@ -61,7 +61,7 @@ def test(model, device, test_loader, epsilon):
 
         # Forward pass the data through the model
         output = model(data)
-        init_pred = output.max(1, keepdim=True)[1]  # get the index of the max log-probability
+        init_pred = output.data.max(1, keepdim=True)[1]  # get the index of the max log-probability
 
         # Calculate the loss
         loss = F.nll_loss(output, target)
@@ -82,18 +82,21 @@ def test(model, device, test_loader, epsilon):
         output = model(perturbed_data)
 
         # Check for success
-        final_pred = output.max(1, keepdim=True)[1]  # get the index of the max log-probability
-        if final_pred.item() == target.item():
-            correct += 1
+        #final_pred = output.max(1, keepdim=True)[1]  # get the index of the max log-probability
+        final_pred = output.data.max(1, keepdim=True)[1]
+        correct += final_pred.eq(target.data.view_as(final_pred)).sum().item()
+#         if final_pred == target:
+#             correct += 1
         
         # Save the adv examples for visualization later
         
         adv_ex = perturbed_data.squeeze().detach().cpu().numpy()
-        adv_examples.append((init_pred.item(), final_pred.item(), adv_ex))
+        adv_examples.append((init_pred.data, final_pred.data, adv_ex))
 
     # Calculate final accuracy for this epsilon
-    final_acc = correct / float(len(test_loader))
-    print("Epsilon: {}\tTest Accuracy = {} / {} = {}".format(epsilon, correct, len(test_loader), final_acc))
+    
+    final_acc = float(correct / len(test_loader.dataset))
+    print("Epsilon: {}\tTest Accuracy = {} / {} = {}".format(epsilon, correct, len(test_loader.dataset), final_acc))
 
     # Return the accuracy and an adversarial example
     return final_acc, adv_examples
@@ -107,7 +110,7 @@ if __name__ == "__main__":
 
     # Run test for each epsilon
     # for eps in epsilons:
-    #     acc, ex = test(classification_model, device, test_loader, eps)
+    #     acc, ex = test_attack(classification_model, device, test_loader, eps)
     #     accuracies.append(acc)
     #     examples.append(ex)
 

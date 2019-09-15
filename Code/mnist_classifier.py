@@ -45,15 +45,16 @@ train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size)
 test_loader = torch.utils.data.DataLoader(test_set, batch_size=batch_size)
 
 
-def train_model(model, train_data):
+def train_model(model, train_data, epochs = 10):
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
-    n_epochs = 10
+    n_epochs = epochs
     model.train()
     
     model.to(device)
     
+    print("started training ...")
     for epoch in range(n_epochs):
 
         for batch in train_data:
@@ -68,7 +69,8 @@ def train_model(model, train_data):
             loss.backward()
             print("the loss after processing this batch is: ", loss.item())
             optimizer.step()
-
+    print("Training completed.")
+    print("=*="*20)
     return model
 
 
