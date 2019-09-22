@@ -15,8 +15,8 @@ def fgsm(model, X, y, epsilon):
     X.requires_grad = True
     output = model(X)
     # output = F.log_softmax(output, dim=1)
-    loss = F.nll_loss(output, y)
-
+    #loss = F.nll_loss(output, y)
+    loss = nn.CrossEntropyLoss()(output, y)
     loss.backward()
     # adv_noise = epsilon * delta.grad.detach().sign()
     adv_noise = epsilon * X.grad.detach().sign()
@@ -27,7 +27,8 @@ def pgd(model, X, y, epsilon, alpha, num_iter):
     """ Construct FGSM adversarial examples on the examples X"""
     delta = torch.zeros_like(X, requires_grad=True)
     for t in range(num_iter):
-        loss = F.nll_loss(model(X + delta), y)
+        #loss = F.nll_loss(model(X + delta), y)
+        loss = nn.CrossEntropyLoss()(model(X + delta), y)
         loss.backward()
         delta.data = (delta + X.shape[0] * alpha * delta.grad.data).clamp(-epsilon, epsilon)
         delta.grad.zero_()
@@ -42,7 +43,8 @@ def norms(Z):
 def pgd_l2(model, X, y, epsilon, alpha, num_iter):
     delta = torch.zeros_like(X, requires_grad=True)
     for t in range(num_iter):
-        loss = F.nll_loss(model(X + delta), y)
+        #loss = F.nll_loss(model(X + delta), y)
+        loss = nn.CrossEntropyLoss()(model(X + delta), y)
         loss.backward()
         delta.data += alpha * delta.grad.detach() / norms(delta.grad.detach())
         delta.data = torch.min(torch.max(delta.detach(), -X), 1 - X)  # clip X+delta to [0,1]
@@ -56,7 +58,8 @@ def pgd_linf(model, X, y, epsilon, alpha, num_iter):
     """ Construct FGSM adversarial examples on the examples X"""
     delta = torch.zeros_like(X, requires_grad=True)
     for t in range(num_iter):
-        loss = F.nll_loss(model(X + delta), y)
+        #loss = F.nll_loss(model(X + delta), y)
+        loss = nn.CrossEntropyLoss()(model(X + delta), y)
         loss.backward()
         delta.data = (delta + alpha * delta.grad.detach().sign()).clamp(-epsilon, epsilon)
         delta.grad.zero_()
@@ -86,7 +89,8 @@ def attack(model, device, loader, attack_method, epsilon, *args):
         delta = attack_method(model, batch_images, batch_labels, epsilon, *args)
         predictions = model(batch_images + delta)
 
-        loss = F.nll_loss(predictions, batch_labels)
+        #loss = F.nll_loss(predictions, batch_labels)
+        loss = nn.CrossEntropyLoss()(predictions, batch_labels)
         correct += (predictions.max(dim=1)[1] == batch_labels).sum().item()
         total_loss += loss.item() * batch_images.shape[0]
 
@@ -98,7 +102,7 @@ def attack(model, device, loader, attack_method, epsilon, *args):
     pass
 
 
-def get_adv_examples(model, device, loader, attack_method, epsilon, *args):
+def get_examples(model, device, loader, attack_method, epsilon, *args):
     adv_examples = []
 
     model.to(device)
@@ -146,7 +150,7 @@ if __name__ == "__main__":
 
     print(attack(trained_model, device, test_loader, pgd_l2, 2, 0.3, 40)[0])
 
-    train_data = get_adv_examples(trained_model, device, test_loader, pgd_l2, 2, 0.3, 40)
+    train_data = get_examples(trained_model, device, test_loader, pgd_l2, 2, 0.3, 40)
 
     print(len(train_data))
 
