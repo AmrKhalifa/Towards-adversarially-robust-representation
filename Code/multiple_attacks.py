@@ -11,15 +11,11 @@ import matplotlib.pyplot as plt
 def fgsm(model, X, y, epsilon):
     """ Construct FGSM adversarial examples on the examples X"""
     delta = torch.zeros_like(X, requires_grad=True)
+    #loss = F.nll_loss(model(X + delta), y)
     loss = nn.CrossEntropyLoss()(model(X + delta), y)
-    X.requires_grad = False
-    #output = model(X + delta)
-    #output = F.log_softmax(output, dim=1)
-    loss = F.nll_loss(output, y)
-    #loss = nn.CrossEntropyLoss()(output, y)
+    
     loss.backward()
     adv_noise = epsilon * delta.grad.detach().sign()
-    #adv_noise = epsilon * X.grad.detach().sign()
     return adv_noise
 
 
@@ -58,8 +54,8 @@ def pgd_linf(model, X, y, epsilon, alpha, num_iter):
     """ Construct FGSM adversarial examples on the examples X"""
     delta = torch.zeros_like(X, requires_grad=True)
     for t in range(num_iter):
-        loss = F.nll_loss(model(X + delta), y)
-        #loss = nn.CrossEntropyLoss()(model(X + delta), y)
+        #loss = F.nll_loss(model(X + delta), y)
+        loss = nn.CrossEntropyLoss()(model(X + delta), y)
         loss.backward()
         delta.data = (delta + alpha * delta.grad.detach().sign()).clamp(-epsilon, epsilon)
         delta.grad.zero_()
